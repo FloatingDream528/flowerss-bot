@@ -6,6 +6,7 @@ import (
 
 	"gorm.io/gorm"
 
+	"github.com/indes/flowerss-bot/internal/log"
 	"github.com/indes/flowerss-bot/internal/model"
 )
 
@@ -42,6 +43,18 @@ func (s *SourceStorageImpl) GetSource(ctx context.Context, id uint) (*model.Sour
 	return source, nil
 }
 
+func (s *SourceStorageImpl) GetSources(ctx context.Context) ([]*model.Source, error) {
+	var sources []*model.Source
+	result := s.db.WithContext(ctx).Find(&sources)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, ErrRecordNotFound
+		}
+		return nil, result.Error
+	}
+	return sources, nil
+}
+
 func (s *SourceStorageImpl) GetSourceByURL(ctx context.Context, url string) (*model.Source, error) {
 	var source = &model.Source{}
 	result := s.db.WithContext(ctx).Where(&model.Source{Link: url}).First(source)
@@ -59,5 +72,15 @@ func (s *SourceStorageImpl) Delete(ctx context.Context, id uint) error {
 	if result.Error != nil {
 		return result.Error
 	}
+	return nil
+}
+
+func (s *SourceStorageImpl) UpsertSource(ctx context.Context, sourceID uint, newSource *model.Source) error {
+	newSource.ID = sourceID
+	result := s.db.WithContext(ctx).Where("id = ?", sourceID).Save(newSource)
+	if result.Error != nil {
+		return result.Error
+	}
+	log.Debugf("update %d row,  sourceID %d new %#v", result.RowsAffected, sourceID, newSource)
 	return nil
 }

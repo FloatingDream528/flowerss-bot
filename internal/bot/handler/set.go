@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"strconv"
-	"strings"
 	"text/template"
 
 	tb "gopkg.in/telebot.v3"
@@ -63,13 +61,18 @@ func (s *Set) Handle(ctx tb.Context) error {
 			tb.ReplyButton{Text: text},
 		}
 		replyKeys = append(replyKeys, replyButton)
+		attachData := &session.Attachment{
+			UserId:   ctx.Chat().ID,
+			SourceId: uint32(source.ID),
+		}
 
+		data := session.Marshal(attachData)
 		setFeedItemBtns = append(
 			setFeedItemBtns, []tb.InlineButton{
 				tb.InlineButton{
 					Unique: SetFeedItemButtonUnique,
 					Text:   fmt.Sprintf("[%d] %s", source.ID, source.Title),
-					Data:   fmt.Sprintf("%d:%d", ownerID, source.ID),
+					Data:   data,
 				},
 			},
 		)
@@ -90,7 +93,7 @@ const (
 	SetFeedItemButtonUnique = "set_feed_item_btn"
 	feedSettingTmpl         = `
 订阅<b>设置</b>
-[id] {{ .sub.ID }}
+[id] {{ .source.ID }}
 [标题] {{ .source.Title }}
 [Link] {{.source.Link }}
 [抓取更新] {{if ge .source.ErrorCount .Count }}暂停{{else if lt .source.ErrorCount .Count }}抓取中{{end}}
@@ -102,11 +105,12 @@ const (
 )
 
 type SetFeedItemButton struct {
-	bot *tb.Bot
+	bot  *tb.Bot
+	core *core.Core
 }
 
-func NewSetFeedItemButton(bot *tb.Bot) *SetFeedItemButton {
-	return &SetFeedItemButton{bot: bot}
+func NewSetFeedItemButton(bot *tb.Bot, core *core.Core) *SetFeedItemButton {
+	return &SetFeedItemButton{bot: bot, core: core}
 }
 
 func (r *SetFeedItemButton) CallbackUnique() string {
@@ -118,11 +122,12 @@ func (r *SetFeedItemButton) Description() string {
 }
 
 func (r *SetFeedItemButton) Handle(ctx tb.Context) error {
-	data := strings.Split(ctx.Callback().Data, ":")
-	if len(data) < 2 {
-		return nil
+	attachData, err := session.UnmarshalAttachment(ctx.Callback().Data)
+	if err != nil {
+		return ctx.Edit("退订错误！")
 	}
-	subscriberID, _ := strconv.ParseInt(data[0], 10, 64)
+
+	subscriberID := attachData.GetUserId()
 	// 如果订阅者与按钮点击者id不一致，需要验证管理员权限
 	if subscriberID != ctx.Callback().Sender.ID {
 		channelChat, err := r.bot.ChatByUsername(fmt.Sprintf("%d", subscriberID))
@@ -135,13 +140,13 @@ func (r *SetFeedItemButton) Handle(ctx tb.Context) error {
 		}
 	}
 
-	sourceID, _ := strconv.Atoi(data[1])
-	source, err := model.GetSourceById(uint(sourceID))
+	sourceID := uint(attachData.GetSourceId())
+	source, err := r.core.GetSource(context.Background(), sourceID)
 	if err != nil {
 		return ctx.Edit("找不到该订阅源")
 	}
 
-	sub, err := model.GetSubscribeByUserIDAndSourceID(subscriberID, source.ID)
+	sub, err := r.core.GetSubscription(context.Background(), subscriberID, source.ID)
 	if err != nil {
 		return ctx.Edit("用户未订阅该rss")
 	}
@@ -161,13 +166,13 @@ func genFeedSetBtn(
 	c *tb.Callback, sub *model.Subscribe, source *model.Source,
 ) [][]tb.InlineButton {
 	setSubTagKey := tb.InlineButton{
-		Unique: "set_set_sub_tag_btn",
+		Unique: SetSubscriptionTagButtonUnique,
 		Text:   "标签设置",
 		Data:   c.Data,
 	}
 
 	toggleNoticeKey := tb.InlineButton{
-		Unique: "set_toggle_notice_btn",
+		Unique: NotificationSwitchButtonUnique,
 		Text:   "开启通知",
 		Data:   c.Data,
 	}

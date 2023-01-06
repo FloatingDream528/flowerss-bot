@@ -197,6 +197,21 @@ func (mr *MockSourceMockRecorder) GetSourceByURL(ctx, url interface{}) *gomock.C
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSourceByURL", reflect.TypeOf((*MockSource)(nil).GetSourceByURL), ctx, url)
 }
 
+// GetSources mocks base method.
+func (m *MockSource) GetSources(ctx context.Context) ([]*model.Source, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetSources", ctx)
+	ret0, _ := ret[0].([]*model.Source)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetSources indicates an expected call of GetSources.
+func (mr *MockSourceMockRecorder) GetSources(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSources", reflect.TypeOf((*MockSource)(nil).GetSources), ctx)
+}
+
 // Init mocks base method.
 func (m *MockSource) Init(ctx context.Context) error {
 	m.ctrl.T.Helper()
@@ -209,6 +224,20 @@ func (m *MockSource) Init(ctx context.Context) error {
 func (mr *MockSourceMockRecorder) Init(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Init", reflect.TypeOf((*MockSource)(nil).Init), ctx)
+}
+
+// UpsertSource mocks base method.
+func (m *MockSource) UpsertSource(ctx context.Context, sourceID uint, newSource *model.Source) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpsertSource", ctx, sourceID, newSource)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpsertSource indicates an expected call of UpsertSource.
+func (mr *MockSourceMockRecorder) UpsertSource(ctx, sourceID, newSource interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpsertSource", reflect.TypeOf((*MockSource)(nil).UpsertSource), ctx, sourceID, newSource)
 }
 
 // MockSubscription is a mock of Subscription interface.
@@ -293,6 +322,21 @@ func (mr *MockSubscriptionMockRecorder) DeleteSubscription(ctx, userID, sourceID
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteSubscription", reflect.TypeOf((*MockSubscription)(nil).DeleteSubscription), ctx, userID, sourceID)
 }
 
+// GetSubscription mocks base method.
+func (m *MockSubscription) GetSubscription(ctx context.Context, userID int64, sourceID uint) (*model.Subscribe, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetSubscription", ctx, userID, sourceID)
+	ret0, _ := ret[0].(*model.Subscribe)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetSubscription indicates an expected call of GetSubscription.
+func (mr *MockSubscriptionMockRecorder) GetSubscription(ctx, userID, sourceID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSubscription", reflect.TypeOf((*MockSubscription)(nil).GetSubscription), ctx, userID, sourceID)
+}
+
 // GetSubscriptionsBySourceID mocks base method.
 func (m *MockSubscription) GetSubscriptionsBySourceID(ctx context.Context, sourceID uint, opts *storage.GetSubscriptionsOptions) (*storage.GetSubscriptionsResult, error) {
 	m.ctrl.T.Helper()
@@ -350,6 +394,34 @@ func (m *MockSubscription) SubscriptionExist(ctx context.Context, userID int64, 
 func (mr *MockSubscriptionMockRecorder) SubscriptionExist(ctx, userID, sourceID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SubscriptionExist", reflect.TypeOf((*MockSubscription)(nil).SubscriptionExist), ctx, userID, sourceID)
+}
+
+// UpdateSubscription mocks base method.
+func (m *MockSubscription) UpdateSubscription(ctx context.Context, userID int64, sourceID uint, newSubscription *model.Subscribe) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateSubscription", ctx, userID, sourceID, newSubscription)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateSubscription indicates an expected call of UpdateSubscription.
+func (mr *MockSubscriptionMockRecorder) UpdateSubscription(ctx, userID, sourceID, newSubscription interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateSubscription", reflect.TypeOf((*MockSubscription)(nil).UpdateSubscription), ctx, userID, sourceID, newSubscription)
+}
+
+// UpsertSubscription mocks base method.
+func (m *MockSubscription) UpsertSubscription(ctx context.Context, userID int64, sourceID uint, newSubscription *model.Subscribe) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpsertSubscription", ctx, userID, sourceID, newSubscription)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpsertSubscription indicates an expected call of UpsertSubscription.
+func (mr *MockSubscriptionMockRecorder) UpsertSubscription(ctx, userID, sourceID, newSubscription interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpsertSubscription", reflect.TypeOf((*MockSubscription)(nil).UpsertSubscription), ctx, userID, sourceID, newSubscription)
 }
 
 // MockContent is a mock of Content interface.
